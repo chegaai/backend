@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  GOOGLE
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model User {
+  id         String        @id @default(uuid())
+  provider   AuthProvider?
+  providerId String?       @unique
+  email      String        @unique
+  password   String
+  profile    Profile?
+  role       UserRole      @default(USER)
+
+  @@map("users")
+}
+
+model Profile {
+  id             String            @id @default(uuid())
+  name           String
+  lastName       String
+  dateOfBirth    DateTime
+  idNumber       String            @unique
+  taxId          String            @unique
+  user           User              @relation(fields: [userId], references: [id])
+  userId         String            @unique
+  profilePicture String?
+  communities    CommunityMember[]
+  events         Event[]
+  rsvps          Rsvp[]
+
+  @@map("profiles")
+}
+
+enum CommunityMemberType {
+  ADMIN
+  ORGANIZER
+  MEMBER
+}
+
+model CommunityMember {
+  profile     Profile             @relation(fields: [profileId], references: [id])
+  profileId   String
+  community   Community           @relation(fields: [communityId], references: [id])
+  communityId String
+  type        CommunityMemberType @default(MEMBER)
+
+  @@id([profileId, communityId])
+  @@map("communitie_members")
+}
+
+model Community {
+  id          String            @id @default(uuid())
+  name        String
+  description String
+  members     CommunityMember[]
+  events      Event[]
+
+  @@map("communities")
+}
+
+model Event {
+  id           String      @id @default(uuid())
+  title        String
+  description  String
+  zipCode      String
+  country      String
+  state        String
+  city         String
+  streetName   String
+  streetNumber String
+  communities  Community[]
+  organizers   Profile[]
+  date         DateTime
+  rsvpStart    DateTime
+  rsvpEnd      DateTime
+  requiresId   Boolean     @default(false)
+  questions    Question[]
+  rsvps        Rsvp[]
+
+  @@map("events")
+}
+
+enum QuestionType {
+  BOOLEAN
+  INPUT
+  CHOICE
+}
+
+model Question {
+  id             String           @id @default(uuid())
+  title          String
+  details        String           @default("")
+  type           QuestionType     @default(INPUT)
+  choices        QuestionChoice[]
+  event          Event            @relation(fields: [eventId], references: [id])
+  eventId        String
+  QuestionAnswer QuestionAnswer[]
+}
+
+model QuestionChoice {
+  id         String   @id @default(uuid())
+  name       String
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String
+}
+
+model QuestionAnswer {
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String
+  rsvp       Rsvp     @relation(fields: [rsvpId], references: [id])
+  rsvpId     String
+
+  @@id([questionId, rsvpId])
+}
+
+model Rsvp {
+  id        String           @id @default(uuid())
+  going     Boolean
+  eventId   String
+  profileId String
+  event     Event            @relation(fields: [eventId], references: [id])
+  profile   Profile          @relation(fields: [profileId], references: [id])
+  answers   QuestionAnswer[]
+
+  @@unique([eventId, profileId])
+}

@@ -1,0 +1,9 @@
+import { PrismaClient } from '.prisma/client'
+
+export type Context = {
+  prisma: PrismaClient
+}
+
+export const createContext = (): Context => ({
+  prisma: new PrismaClient()
+})
