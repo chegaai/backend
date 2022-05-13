@@ -47,7 +47,8 @@
   },
   "mysql": {
     "test": {
-      "migrationsScript": "npm run test:prepareDb"
+      "migrationsScript": "npm run test:prepareDb",
+      "image": "mariadb:10.5.8"
     }
   }
 }
