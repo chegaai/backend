@@ -73,25 +73,34 @@ model Community {
 }
 
 model Event {
-  id           String      @id @default(uuid())
-  title        String
-  description  String
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  communities Community[]
+  organizers  Profile[]
+  date        DateTime
+  rsvpStart   DateTime
+  rsvpEnd     DateTime
+  requiresId  Boolean      @default(false)
+  questions   Question[]
+  rsvps       Rsvp[]
+  addressId   String       @unique
+  address     EventAddress @relation(fields: [addressId], references: [id])
+
+  @@map("events")
+}
+
+model EventAddress {
+  id           String  @id @default(uuid())
   zipCode      String
   country      String
   state        String
   city         String
   streetName   String
   streetNumber String
-  communities  Community[]
-  organizers   Profile[]
-  date         DateTime
-  rsvpStart    DateTime
-  rsvpEnd      DateTime
-  requiresId   Boolean     @default(false)
-  questions    Question[]
-  rsvps        Rsvp[]
+  Event        Event[]
 
-  @@map("events")
+  @@map("event_addresses")
 }
 
 enum QuestionType {
@@ -109,6 +118,8 @@ model Question {
   event          Event            @relation(fields: [eventId], references: [id])
   eventId        String
   QuestionAnswer QuestionAnswer[]
+
+  @@map("questions")
 }
 
 model QuestionChoice {
@@ -116,6 +127,8 @@ model QuestionChoice {
   name       String
   question   Question @relation(fields: [questionId], references: [id])
   questionId String
+
+  @@map("question_choices")
 }
 
 model QuestionAnswer {
@@ -125,6 +138,7 @@ model QuestionAnswer {
   rsvpId     String
 
   @@id([questionId, rsvpId])
+  @@map("question_answers")
 }
 
 model Rsvp {
@@ -137,4 +151,5 @@ model Rsvp {
   answers   QuestionAnswer[]
 
   @@unique([eventId, profileId])
+  @@map("rsvps")
 }

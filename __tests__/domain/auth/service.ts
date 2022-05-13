@@ -1,7 +1,7 @@
 import { Profile } from '@prisma/client'
 import { ZodError } from 'zod'
 import { AuthenticationError, ProfileAlreadyExistsError } from '../../../src/domain/auth/errors'
-import { AuthService, createAuthService } from '../../../src/domain/auth/service'
+import { AuthService, createAuthService } from '../../../src/domain/auth'
 import { createArgon2Hash, decodeJwt, omit } from '../../../src/util'
 import { Context, createContext } from '../../context'
 import { PROFILE_FIXTURE, USER_FIXTURE } from '../../fixtures'

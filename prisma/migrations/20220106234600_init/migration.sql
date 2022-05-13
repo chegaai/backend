@@ -3,10 +3,12 @@ CREATE TABLE `users` (
     `id` VARCHAR(191) NOT NULL,
     `provider` ENUM('GOOGLE') NULL,
     `providerId` VARCHAR(191) NULL,
+    `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `role` ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
 
     UNIQUE INDEX `users_providerId_key`(`providerId`),
+    UNIQUE INDEX `users_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -16,13 +18,11 @@ CREATE TABLE `profiles` (
     `name` VARCHAR(191) NOT NULL,
     `lastName` VARCHAR(191) NOT NULL,
     `dateOfBirth` DATETIME(3) NOT NULL,
-    `email` VARCHAR(191) NOT NULL,
     `idNumber` VARCHAR(191) NOT NULL,
     `taxId` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
     `profilePicture` VARCHAR(191) NULL,
 
-    UNIQUE INDEX `profiles_email_key`(`email`),
     UNIQUE INDEX `profiles_idNumber_key`(`idNumber`),
     UNIQUE INDEX `profiles_taxId_key`(`taxId`),
     UNIQUE INDEX `profiles_userId_key`(`userId`),
@@ -52,22 +52,31 @@ CREATE TABLE `events` (
     `id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,
+    `date` DATETIME(3) NOT NULL,
+    `rsvpStart` DATETIME(3) NOT NULL,
+    `rsvpEnd` DATETIME(3) NOT NULL,
+    `requiresId` BOOLEAN NOT NULL DEFAULT false,
+    `addressId` VARCHAR(191) NOT NULL,
+
+    UNIQUE INDEX `events_addressId_key`(`addressId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `event_addresses` (
+    `id` VARCHAR(191) NOT NULL,
     `zipCode` VARCHAR(191) NOT NULL,
     `country` VARCHAR(191) NOT NULL,
     `state` VARCHAR(191) NOT NULL,
     `city` VARCHAR(191) NOT NULL,
     `streetName` VARCHAR(191) NOT NULL,
     `streetNumber` VARCHAR(191) NOT NULL,
-    `date` DATETIME(3) NOT NULL,
-    `rsvpStart` DATETIME(3) NOT NULL,
-    `rsvpEnd` DATETIME(3) NOT NULL,
-    `requiresId` BOOLEAN NOT NULL DEFAULT false,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Question` (
+CREATE TABLE `questions` (
     `id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
     `details` VARCHAR(191) NOT NULL DEFAULT '',
@@ -78,7 +87,7 @@ CREATE TABLE `Question` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `QuestionChoice` (
+CREATE TABLE `question_choices` (
     `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `questionId` VARCHAR(191) NOT NULL,
@@ -87,7 +96,7 @@ CREATE TABLE `QuestionChoice` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `QuestionAnswer` (
+CREATE TABLE `question_answers` (
     `questionId` VARCHAR(191) NOT NULL,
     `rsvpId` VARCHAR(191) NOT NULL,
 
@@ -95,13 +104,13 @@ CREATE TABLE `QuestionAnswer` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Rsvp` (
+CREATE TABLE `rsvps` (
     `id` VARCHAR(191) NOT NULL,
     `going` BOOLEAN NOT NULL,
     `eventId` VARCHAR(191) NOT NULL,
     `profileId` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `Rsvp_eventId_profileId_key`(`eventId`, `profileId`),
+    UNIQUE INDEX `rsvps_eventId_profileId_key`(`eventId`, `profileId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -133,22 +142,25 @@ ALTER TABLE `communitie_members` ADD CONSTRAINT `communitie_members_profileId_fk
 ALTER TABLE `communitie_members` ADD CONSTRAINT `communitie_members_communityId_fkey` FOREIGN KEY (`communityId`) REFERENCES `communities`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Question` ADD CONSTRAINT `Question_eventId_fkey` FOREIGN KEY (`eventId`) REFERENCES `events`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `events` ADD CONSTRAINT `events_addressId_fkey` FOREIGN KEY (`addressId`) REFERENCES `event_addresses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `QuestionChoice` ADD CONSTRAINT `QuestionChoice_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `questions` ADD CONSTRAINT `questions_eventId_fkey` FOREIGN KEY (`eventId`) REFERENCES `events`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `QuestionAnswer` ADD CONSTRAINT `QuestionAnswer_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `question_choices` ADD CONSTRAINT `question_choices_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `questions`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `QuestionAnswer` ADD CONSTRAINT `QuestionAnswer_rsvpId_fkey` FOREIGN KEY (`rsvpId`) REFERENCES `Rsvp`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `question_answers` ADD CONSTRAINT `question_answers_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `questions`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Rsvp` ADD CONSTRAINT `Rsvp_eventId_fkey` FOREIGN KEY (`eventId`) REFERENCES `events`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `question_answers` ADD CONSTRAINT `question_answers_rsvpId_fkey` FOREIGN KEY (`rsvpId`) REFERENCES `rsvps`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Rsvp` ADD CONSTRAINT `Rsvp_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `profiles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `rsvps` ADD CONSTRAINT `rsvps_eventId_fkey` FOREIGN KEY (`eventId`) REFERENCES `events`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `rsvps` ADD CONSTRAINT `rsvps_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `profiles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_EventToProfile` ADD FOREIGN KEY (`A`) REFERENCES `events`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
