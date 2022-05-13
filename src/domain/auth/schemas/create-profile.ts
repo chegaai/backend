@@ -18,8 +18,10 @@ export const ProfileCreationSchema = z.object({
       const hasNumber = /\d/
       const hasUpperCase = /[A-Z]/
       const hasLowerCase = /[a-z]/
-      const hasSpecialCharacter = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/
-      return hasNumber.test(value) && hasUpperCase.test(value) && hasLowerCase.test(value) && hasSpecialCharacter.test(value)
+      const hasSpecialCharacter = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/
+      return (
+        hasNumber.test(value) && hasUpperCase.test(value) && hasLowerCase.test(value) && hasSpecialCharacter.test(value)
+      )
     })
 })
 
