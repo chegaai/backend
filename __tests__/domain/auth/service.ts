@@ -1,7 +1,10 @@
 import { Profile } from '@prisma/client'
 import { ZodError } from 'zod'
-import { AuthenticationError, ProfileAlreadyExistsError } from '../../../src/domain/auth/errors'
-import { AuthService, createAuthService } from '../../../src/domain/auth'
+import {
+  AuthenticationError,
+  ProfileAlreadyExistsError
+} from '../../../src/domain/auth/errors'
+import { AuthService } from '../../../src/domain/auth'
 import { createArgon2Hash, decodeJwt, omit } from '../../../src/util'
 import { Context, createContext } from '../../context'
 import { PROFILE_FIXTURE, USER_FIXTURE } from '../../fixtures'
@@ -12,7 +15,7 @@ describe('auth service', () => {
 
   beforeAll(() => {
     ctx = createContext()
-    authService = createAuthService(ctx)
+    authService = new AuthService(ctx)
   })
 
   afterEach(async () => {
@@ -43,12 +46,16 @@ describe('auth service', () => {
         data: {
           ...USER_FIXTURE,
           profile: {
-            create: (({ userId, ...profile }: Profile) => ({ ...profile }))(PROFILE_FIXTURE)
+            create: (({ userId, ...profile }: Profile) => ({ ...profile }))(
+              PROFILE_FIXTURE
+            )
           }
         }
       })
 
-      return expect(authService.signup(SIGNUP_FIXTURE)).rejects.toThrow(ProfileAlreadyExistsError)
+      return expect(authService.signup(SIGNUP_FIXTURE)).rejects.toThrow(
+        ProfileAlreadyExistsError
+      )
     })
 
     it('should create user and profile', async () => {
@@ -76,14 +83,20 @@ describe('auth service', () => {
       expect.assertions(3)
       return Promise.all([
         expect(authService.login({} as any)).rejects.toThrow(ZodError),
-        expect(authService.login({ email: LOGIN_FIXTURE.email, password: '' })).rejects.toThrow(ZodError),
-        expect(authService.login({ email: '', password: LOGIN_FIXTURE.password })).rejects.toThrow(ZodError)
+        expect(
+          authService.login({ email: LOGIN_FIXTURE.email, password: '' })
+        ).rejects.toThrow(ZodError),
+        expect(
+          authService.login({ email: '', password: LOGIN_FIXTURE.password })
+        ).rejects.toThrow(ZodError)
       ])
     })
 
     it('should fail if user does not exist', async () => {
       expect.assertions(1)
-      return expect(authService.login(LOGIN_FIXTURE)).rejects.toThrow(AuthenticationError)
+      return expect(authService.login(LOGIN_FIXTURE)).rejects.toThrow(
+        AuthenticationError
+      )
     })
 
     it('should fail if password is not correct', async () => {
@@ -91,16 +104,18 @@ describe('auth service', () => {
         data: {
           ...USER_FIXTURE,
           profile: {
-            create: (({ userId, ...profile }: Profile) => ({ ...profile }))(PROFILE_FIXTURE)
+            create: (({ userId, ...profile }: Profile) => ({ ...profile }))(
+              PROFILE_FIXTURE
+            )
           }
         }
       })
 
       expect.assertions(1)
 
-      return expect(authService.login({ ...LOGIN_FIXTURE, password: 'senhaSenhaForte123@' })).rejects.toThrow(
-        AuthenticationError
-      )
+      return expect(
+        authService.login({ ...LOGIN_FIXTURE, password: 'senhaSenhaForte123@' })
+      ).rejects.toThrow(AuthenticationError)
     })
 
     it('should return a valid token when login and password are valid', async () => {
@@ -109,7 +124,9 @@ describe('auth service', () => {
           ...USER_FIXTURE,
           password: await createArgon2Hash(LOGIN_FIXTURE.password),
           profile: {
-            create: (({ userId, ...profile }: Profile) => ({ ...profile }))(PROFILE_FIXTURE)
+            create: (({ userId, ...profile }: Profile) => ({ ...profile }))(
+              PROFILE_FIXTURE
+            )
           }
         }
       })
@@ -132,11 +149,15 @@ describe('auth service', () => {
 
       await ctx.prisma.user.create({ data: USER_FIXTURE })
 
-      return expect(authService.emailExists(USER_FIXTURE.email)).resolves.toBe(true)
+      return expect(authService.emailExists(USER_FIXTURE.email)).resolves.toBe(
+        true
+      )
     })
 
     it('should return false if user with email does not exist', async () => {
-      return expect(authService.emailExists(USER_FIXTURE.email)).resolves.toBe(false)
+      return expect(authService.emailExists(USER_FIXTURE.email)).resolves.toBe(
+        false
+      )
     })
   })
 
@@ -152,8 +173,12 @@ describe('auth service', () => {
       })
 
       return Promise.all([
-        expect(authService.taxIdExists(PROFILE_FIXTURE.taxId)).resolves.toBe(true),
-        expect(authService.idNumberExists(PROFILE_FIXTURE.idNumber)).resolves.toBe(true)
+        expect(authService.taxIdExists(PROFILE_FIXTURE.taxId)).resolves.toBe(
+          true
+        ),
+        expect(
+          authService.idNumberExists(PROFILE_FIXTURE.idNumber)
+        ).resolves.toBe(true)
       ])
     })
 
@@ -161,8 +186,12 @@ describe('auth service', () => {
       expect.assertions(2)
 
       return Promise.all([
-        expect(authService.taxIdExists(PROFILE_FIXTURE.taxId)).resolves.toBe(false),
-        expect(authService.idNumberExists(PROFILE_FIXTURE.idNumber)).resolves.toBe(false)
+        expect(authService.taxIdExists(PROFILE_FIXTURE.taxId)).resolves.toBe(
+          false
+        ),
+        expect(
+          authService.idNumberExists(PROFILE_FIXTURE.idNumber)
+        ).resolves.toBe(false)
       ])
     })
   })
