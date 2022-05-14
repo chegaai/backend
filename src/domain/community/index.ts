@@ -45,13 +45,20 @@ export class CommunityService {
     const { name, description, skip, take } =
       CommunitySearchParamsSchema.parse(rawParams)
 
-    return this.#prisma.community.findMany({
+    const where = {
       where: {
-        ...(name ? { name } : {}),
-        ...(description ? { description } : {})
-      },
+        OR: [
+          ...(name ? [{ name: { contains: name } }] : []),
+          ...(description ? [{ description: { contains: description } }] : [])
+        ]
+      }
+    }
+
+    return this.#prisma.community.findMany({
+      ...(name || description ? where : {}),
       skip,
-      take
+      take,
+      orderBy: { name: 'asc' }
     })
   }
 }

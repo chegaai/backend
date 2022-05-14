@@ -30,7 +30,7 @@ CREATE TABLE `profiles` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `communitie_members` (
+CREATE TABLE `community_members` (
     `profileId` VARCHAR(191) NOT NULL,
     `communityId` VARCHAR(191) NOT NULL,
     `type` ENUM('ADMIN', 'ORGANIZER', 'MEMBER') NOT NULL DEFAULT 'MEMBER',
@@ -136,10 +136,10 @@ CREATE TABLE `_CommunityToEvent` (
 ALTER TABLE `profiles` ADD CONSTRAINT `profiles_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `communitie_members` ADD CONSTRAINT `communitie_members_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `profiles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `community_members` ADD CONSTRAINT `community_members_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `profiles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `communitie_members` ADD CONSTRAINT `communitie_members_communityId_fkey` FOREIGN KEY (`communityId`) REFERENCES `communities`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `community_members` ADD CONSTRAINT `community_members_communityId_fkey` FOREIGN KEY (`communityId`) REFERENCES `communities`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `events` ADD CONSTRAINT `events_addressId_fkey` FOREIGN KEY (`addressId`) REFERENCES `event_addresses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

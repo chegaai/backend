@@ -59,7 +59,7 @@ model CommunityMember {
   type        CommunityMemberType @default(MEMBER)
 
   @@id([profileId, communityId])
-  @@map("communitie_members")
+  @@map("community_members")
 }
 
 model Community {
